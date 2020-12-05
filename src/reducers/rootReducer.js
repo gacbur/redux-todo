@@ -1,13 +1,7 @@
 import * as actionType from '../actions/actionTypes'
 
 const initialState = {
-    todos: [
-        {
-            id: 0,
-            text: 'do the dishes',
-            isDone: false
-        }
-    ]
+    todos: []
 }
 
 const rootReducer = (state = initialState, action) => {

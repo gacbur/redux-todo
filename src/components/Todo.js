@@ -1,34 +1,43 @@
 import React, { useState } from 'react'
+import { connect } from 'react-redux'
 
 import uuid from 'react-uuid'
 
 import { addTodo, removeTodo, doneTodo } from '../actions/actions'
 
-const Todo = ({ todos, dispatch }) => {
+const Todo = ({ todos, addTodo, removeTodo, doneTodo }) => {
 
     const [text, setText] = useState('')
-    const [alertEmpty, setAlertEmpty] = useState(false)
+    const [alertIsEmpty, setAlertIsEmpty] = useState(false)
+
 
     const handleAddTodo = () => {
-
-        if (text !== "") {
-            dispatch(addTodo({
+        if (text !== '') {
+            addTodo({
                 id: uuid(),
-                text: text
-            }))
+                text,
+                isDone: false
+            })
+
             setText('')
-            setAlertEmpty(false)
-        } else {
-            setAlertEmpty(true)
+            setAlertIsEmpty(false)
+        }
+        else {
+            setAlertIsEmpty(true)
         }
     }
 
-    const handleTaskDone = (id, isDone) => {
-        dispatch(doneTodo({
+    const handleTodoDelete = (id) => {
+        removeTodo(id)
+    }
+
+    const handleTaskComplete = (id, isDone) => {
+        doneTodo({
             id,
             isDone
-        }))
+        })
     }
+
 
     return (
         <div className="todo">
@@ -36,7 +45,7 @@ const Todo = ({ todos, dispatch }) => {
                 <input
                     type="text"
                     value={text}
-                    placeholder={alertEmpty ? "Write something first!" : ''}
+                    placeholder={alertIsEmpty ? "Write something first!" : ''}
                     onChange={(e) => setText(e.target.value)}>
                 </input>
                 <button onClick={() => handleAddTodo()}>Add</button>
@@ -47,10 +56,11 @@ const Todo = ({ todos, dispatch }) => {
                         <>
                             <div className="todo-item">
                                 <li
+                                    className={todo.isDone ? 'done' : ''}
                                     key={todo.id}
-                                    onClick={() => handleTaskDone(todo.id, todo.isDone)}
+                                    onClick={() => handleTaskComplete(todo.id, todo.isDone)}
                                 >{todo.text}</li>
-                                <button onClick={() => dispatch(removeTodo(todo.id))}>x</button>
+                                <button onClick={() => handleTodoDelete(todo.id)}>x</button>
                             </div>
                         </>
                     )) : <div className="todo-list-empty">The list is empty!</div>}
@@ -60,4 +70,14 @@ const Todo = ({ todos, dispatch }) => {
     )
 }
 
-export default Todo
+const mapStateToProps = state => ({ todos: state.todos })
+const mapDispatchToProps = dispatch => {
+    return {
+        addTodo: payload => dispatch(addTodo(payload)),
+        removeTodo: payload => dispatch(removeTodo(payload)),
+        doneTodo: payload => dispatch(doneTodo(payload)),
+    }
+}
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(Todo)
